@@ -1,45 +1,31 @@
 ---
 name: log-scrubber
-description: Automatically scrub API keys and secrets from logs and memory files.
-homepage: https://github.com/Heather-Herbert/log-scrubber
-metadata:
-  clawdbot:
-    emoji: "🧼"
-    requires:
-      env: []
-    primaryEnv: ""
-    files: ["scripts/scrub.py"]
+description: Automatically redacts API keys, tokens, and secrets from workspace logs and memory files.
 ---
 
 # Log Scrubber
 
-Protect your session data by redacting common API key patterns and secrets from your workspace logs and memory files.
+This skill automatically scans your `/root/.openclaw/workspace/` environment, logs, and memory files to detect and redact sensitive information like API keys, tokens, and credentials.
 
-## External Endpoints
-None. This skill operates entirely locally on your workstation/server.
-
-| Endpoint | Data Sent |
-| :--- | :--- |
-| N/A | None |
-
-## Security & Privacy
-- **Local Only:** This skill does not transmit data to any external server.
-- **File Access:** Reads and modifies files in designated `memory/`, `logs/`, and `MEMORY.md` locations within the OpenClaw workspace.
-- **Redaction:** Uses regex patterns to identify and replace sensitive tokens with `[REDACTED]`.
-
-## Model Invocation Note
-This skill is designed to run as a cron job or manual command to maintain workspace hygiene. It does not require continuous model monitoring.
-
-## Trust Statement
-By using this skill, you allow it to modify files in your workspace for the purpose of secret redaction. Only install if you trust the local regex implementation.
+## Features
+- **Proactive Scanning**: Scans for known patterns (regex) of common secrets.
+- **Automated Redaction**: Sanitizes files in-place while keeping backups of original files (e.g., `.bak` extension).
+- **Security**: Ensures your secrets don't accidentally end up in logs sent to providers or stored in plain-text memory files.
 
 ## Usage
-Add to your `cron` jobs to run periodically:
-```json
-{
-  "name": "Log Scrubbing",
-  "schedule": { "kind": "cron", "expr": "0 2 * * *" },
-  "payload": { "kind": "systemEvent", "text": "Run log-scrubber to protect secrets." },
-  "sessionTarget": "main"
-}
+
+### 1. Manual Scrub
+You can trigger a full scan and scrub manually:
+```bash
+# Within an agent swarm or directly via tools
+log_scrub_run
 ```
+
+### 2. Automated Maintenance (Cron)
+This skill is designed to run automatically at 2:00 AM UTC to ensure your environment stays clean.
+
+---
+## Implementation
+- **Script**: `/root/.openclaw/workspace/skills/log-scrubber/scripts/scrub.py`
+- **Schedule**: `0 2 * * *` (Cron)
+- **Target**: `main` session
